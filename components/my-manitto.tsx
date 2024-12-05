@@ -12,12 +12,12 @@ import { Label } from './ui/label';
 import { Input } from './ui/input';
 import { useActionState, useState } from 'react';
 import { confirmMember, getAllMemberNames } from '@/app/actions/member';
-import { Badge } from './ui/badge';
+// import { Badge } from './ui/badge';
 import SlotMachine from './slot-machine2';
 
 export default function MyManitto({ id }: { id?: string }) {
 	const [isConfirmed, setIsConfirmed] = useState(false);
-	const [manitto, setManitto] = useState<string>();
+	// const [manitto, setManitto] = useState<string>();
 	const [data, formAction, isPending] = useActionState(onSubmit, undefined);
 	const [members, setMembers] = useState<string[]>([]);
 	async function onSubmit(prevState: any, formData: FormData) {
@@ -26,7 +26,7 @@ export default function MyManitto({ id }: { id?: string }) {
 
 		if (member) {
 			if (member.manitto) {
-				setManitto(member.manitto.name);
+				// setManitto(member.manitto.name);
 			} else {
 				const { members: _members } = await getAllMemberNames();
 				setMembers(_members);

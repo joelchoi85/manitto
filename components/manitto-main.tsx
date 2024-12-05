@@ -18,10 +18,9 @@ type MemberType = Member & {
 	manitto?: Member;
 };
 type MessageType = Message & { Member: { name: string } };
-export default function ManittoMain({ members: _members }: ManittoMainProps) {
+export default function ManittoMain({ members }: ManittoMainProps) {
 	const [viewportHeight, setViewportHeight] = useState(window.innerHeight);
 	const messageEndRef = useRef<HTMLDivElement | null>(null); // 스크롤 내릴 참조
-	const [members, setMembers] = useState<MemberType[]>(_members);
 	const [collapse, setCollapse] = useState<boolean>(false);
 
 	const buttonRef = useRef<HTMLButtonElement>(null);
@@ -47,7 +46,7 @@ export default function ManittoMain({ members: _members }: ManittoMainProps) {
 	}, []);
 	useEffect(() => {
 		const fetchMessages = async () => {
-			const { data, count, error, status, statusText } = await supadb
+			const { data /* count, error, status, statusText */ } = await supadb
 				.from('Message')
 				.select('*, Member(name)')
 				.order('createdAt', { ascending: true });
@@ -119,7 +118,7 @@ export default function ManittoMain({ members: _members }: ManittoMainProps) {
 		console.log('userID', user?.id);
 		if (input && user && user.id.length > 0) {
 			try {
-				const data = await supadb.from('Message').insert([{ id: createId(), memberId: user.id, message: input }]);
+				await supadb.from('Message').insert([{ id: createId(), memberId: user.id, message: input }]);
 				setInput('');
 			} catch (error) {
 				console.log(error);
@@ -145,7 +144,7 @@ export default function ManittoMain({ members: _members }: ManittoMainProps) {
 				</CardHeader>
 				<CardContent className={cn(collapse && 'hidden')}>
 					<div className="flex flex-wrap gap-2">
-						{members.map((member, idx) => (
+						{members.map(member => (
 							<Badge key={member.id} variant={member.id === user?.id ? 'default' : 'secondary'}>
 								{member.name}
 							</Badge>

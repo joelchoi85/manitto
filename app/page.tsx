@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import Image from 'next/image';
 import { useActionState, useState } from 'react';
-import { addMember, changePassword, confirmMember, findMemberByName } from './actions/member';
+import { changePassword, confirmMember, findMemberByName } from './actions/member';
 import { AddMember } from '@/schemas';
 import { useRouter } from 'next/navigation';
 // import { useFormState, useFormStatus } from 'react-dom';

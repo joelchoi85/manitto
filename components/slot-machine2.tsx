@@ -1,7 +1,7 @@
 import { launchMachine } from '@/app/actions/slot-machine';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
-import { ArrowUpIcon, ArrowUpNarrowWide } from 'lucide-react';
+import { ArrowUpIcon } from 'lucide-react';
 import React, { useState, useEffect, useRef } from 'react';
 
 const SYMBOL_HEIGHT = 60;
@@ -28,6 +28,7 @@ const SlotMachine = ({ members: SYMBOLS, manitto }: SlotMachineProps) => {
 		setIsSpinning(true);
 		// 랜덤 슬롯 실행
 		const { error, manitto } = await launchMachine(localStorage.getItem('uid')!);
+		error && toast({ title: 'ERROR', description: (error as Error).message });
 		const newResult = tripleSymbols.findIndex(x => x === manitto);
 		setResult(newResult);
 

@@ -1,6 +1,5 @@
 'use server';
 import bcrypt from 'bcrypt';
-import { AddMember } from '@/schemas';
 import { Member } from '../page';
 import prisma from '@/lib/client/prisma';
 
@@ -42,6 +41,7 @@ export async function findMemberByName(name: string) {
 		if (member) return { id: member.id, name: member.name, isFirst: !member.password || member.password.length === 0 };
 		return;
 	} catch (error) {
+		console.log(error);
 		return;
 	}
 }
