@@ -15,6 +15,8 @@ import useCurrentMember from '@/hooks/use-current-member';
 
 type MessageType = Message & { Member: { name: string } };
 export default function ManittoMain() {
+	const { initMembers, members } = useMemberStore();
+	const { member } = useCurrentMember();
 	const [viewportHeight, setViewportHeight] = useState(window.innerHeight);
 	const messageEndRef = useRef<HTMLDivElement | null>(null); // 스크롤 내릴 참조
 	const [collapse, setCollapse] = useState<boolean>(false);
@@ -22,7 +24,6 @@ export default function ManittoMain() {
 	const buttonRef = useRef<HTMLButtonElement>(null);
 	const [messages, setMessages] = useState<MessageType[]>([]);
 	const [input, setInput] = useState('');
-	const [mounted, setMounted] = useState<boolean>(false);
 	useEffect(() => {
 		initMembers();
 		const handleResize = () => {
@@ -103,7 +104,6 @@ export default function ManittoMain() {
 	}, []);
 
 	useEffect(() => {
-		setMounted(true);
 		if (messageEndRef.current) {
 			messageEndRef.current.scrollIntoView({ behavior: 'smooth' });
 		}
@@ -118,9 +118,6 @@ export default function ManittoMain() {
 			}
 		}
 	};
-	if (!mounted) return null;
-	const { initMembers, members } = useMemberStore();
-	const { member } = useCurrentMember();
 
 	return (
 		<div className="font-pretendard relative bg-sky-600 h-screen w-screen overflow-hidden flex flex-col gap-4">

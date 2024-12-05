@@ -1,3 +1,4 @@
+'use client';
 import { getAllMembers } from '@/app/actions/member';
 import { create } from 'zustand';
 interface Member {
