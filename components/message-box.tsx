@@ -7,7 +7,6 @@ interface MessageBoxProps {
 	itsMe: boolean;
 }
 export default function MessageBox({ name, msg, itsMe }: MessageBoxProps) {
-	console.log(msg.createdAt, typeof msg.createdAt);
 	const createdAt =
 		msg.createdAt instanceof Date
 			? new Date(msg.createdAt.getTime() + 9 * 60 * 60 * 1000)

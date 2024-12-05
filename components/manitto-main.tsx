@@ -42,7 +42,6 @@ export default function ManittoMain({ members }: ManittoMainProps) {
 
 	useEffect(() => {
 		setUser({ id: localStorage.getItem('uid') || '', name: localStorage.getItem('uname') || '' });
-		console.log(localStorage.getItem('uid'));
 	}, []);
 	useEffect(() => {
 		const fetchMessages = async () => {
@@ -115,7 +114,6 @@ export default function ManittoMain({ members }: ManittoMainProps) {
 		}
 	}, [messages]);
 	const sendMessage = async () => {
-		console.log('userID', user?.id);
 		if (input && user && user.id.length > 0) {
 			try {
 				await supadb.from('Message').insert([{ id: createId(), memberId: user.id, message: input }]);

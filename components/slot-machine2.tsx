@@ -17,7 +17,7 @@ const SlotMachine = ({ members: SYMBOLS, manitto }: SlotMachineProps) => {
 	const reelRef = useRef<HTMLDivElement>(null);
 	const { toast } = useToast();
 
-	const tripleSymbols = [...SYMBOLS, ...SYMBOLS, ...SYMBOLS];
+	const tripleSymbols = [...SYMBOLS, ...SYMBOLS, ...SYMBOLS, ...SYMBOLS];
 
 	// 랜덤으로 정한 결과를 받는 함수
 	const spin = async () => {
@@ -29,7 +29,7 @@ const SlotMachine = ({ members: SYMBOLS, manitto }: SlotMachineProps) => {
 		// 랜덤 슬롯 실행
 		const { error, manitto } = await launchMachine(localStorage.getItem('uid')!);
 		if (error) toast({ title: 'ERROR', description: (error as Error).message });
-		const newResult = tripleSymbols.findIndex(x => x === manitto);
+		const newResult = tripleSymbols.findLastIndex(x => x === manitto);
 		setResult(newResult);
 
 		if (reelRef.current) {
