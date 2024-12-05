@@ -10,24 +10,22 @@ import MessageBox from './message-box';
 import { cn } from '@/lib/utils';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import MyManitto from './my-manitto';
+import useMemberStore from '@/hooks/use-members';
+import useCurrentMember from '@/hooks/use-current-member';
 
-interface ManittoMainProps {
-	members: Member[];
-}
-// type MemberType = Member & {
-// 	manitto?: Member;
-// };
 type MessageType = Message & { Member: { name: string } };
-export default function ManittoMain({ members }: ManittoMainProps) {
+export default function ManittoMain() {
+	const { initMembers, members } = useMemberStore();
+	const { member } = useCurrentMember();
 	const [viewportHeight, setViewportHeight] = useState(window.innerHeight);
 	const messageEndRef = useRef<HTMLDivElement | null>(null); // 스크롤 내릴 참조
 	const [collapse, setCollapse] = useState<boolean>(false);
 
 	const buttonRef = useRef<HTMLButtonElement>(null);
 	const [messages, setMessages] = useState<MessageType[]>([]);
-	const [user, setUser] = useState<{ id: string; name: string }>();
 	const [input, setInput] = useState('');
 	useEffect(() => {
+		initMembers();
 		const handleResize = () => {
 			setViewportHeight(window.innerHeight);
 		};
@@ -40,9 +38,6 @@ export default function ManittoMain({ members }: ManittoMainProps) {
 		};
 	}, []);
 
-	useEffect(() => {
-		setUser({ id: localStorage.getItem('uid') || '', name: localStorage.getItem('uname') || '' });
-	}, []);
 	useEffect(() => {
 		const fetchMessages = async () => {
 			const { data /* count, error, status, statusText */ } = await supadb
@@ -114,9 +109,9 @@ export default function ManittoMain({ members }: ManittoMainProps) {
 		}
 	}, [messages]);
 	const sendMessage = async () => {
-		if (input && user && user.id.length > 0) {
+		if (input && member && member.id.length > 0) {
 			try {
-				await supadb.from('Message').insert([{ id: createId(), memberId: user.id, message: input }]);
+				await supadb.from('Message').insert([{ id: createId(), memberId: member.id, message: input }]);
 				setInput('');
 			} catch (error) {
 				console.log(error);
@@ -143,7 +138,7 @@ export default function ManittoMain({ members }: ManittoMainProps) {
 				<CardContent className={cn(collapse && 'hidden')}>
 					<div className="flex flex-wrap gap-2">
 						{members.map(member => (
-							<Badge key={member.id} variant={member.id === user?.id ? 'default' : 'secondary'}>
+							<Badge key={member.id} variant={!!member.manittoId ? 'default' : 'secondary'}>
 								{member.name}
 							</Badge>
 						))}
@@ -153,13 +148,13 @@ export default function ManittoMain({ members }: ManittoMainProps) {
 					<Badge variant={'outline'} onClick={() => setCollapse(prev => !prev)}>
 						{collapse ? <ChevronDown /> : <ChevronUp />}
 					</Badge>
-					<MyManitto id={user?.id} />
+					<MyManitto />
 				</CardFooter>
 			</Card>
 			<div className="pt-16 px-4 overflow-y-scroll" style={{ minHeight: `${viewportHeight}px` }}>
 				{messages.map(msg => (
 					<div key={msg.id} className="my-2">
-						{user?.id !== msg.memberId ? (
+						{member?.id !== msg.memberId ? (
 							<MessageBox name={msg.Member?.name || ''} msg={msg} itsMe={false} />
 						) : (
 							<MessageBox name={msg.Member?.name || ''} msg={msg} itsMe={true} />

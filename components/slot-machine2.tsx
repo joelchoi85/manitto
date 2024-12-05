@@ -1,23 +1,38 @@
+'use client';
 import { launchMachine } from '@/app/actions/slot-machine';
+import useCurrentMember from '@/hooks/use-current-member';
+import useMemberStore from '@/hooks/use-members';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
+import { formatDistanceToNow } from 'date-fns';
 import { ArrowUpIcon } from 'lucide-react';
 import React, { useState, useEffect, useRef } from 'react';
+import { ko } from 'date-fns/locale';
 
 const SYMBOL_HEIGHT = 60;
 const SPIN_DURATION = 7000;
-interface SlotMachineProps {
-	manitto?: string;
-	members: string[];
-}
-const SlotMachine = ({ members: SYMBOLS, manitto }: SlotMachineProps) => {
+// interface SlotMachineProps {
+// 	manitto?: string;
+// 	memberNameList: string[];
+// }
+const SlotMachine = () => {
 	const [isSpinning, setIsSpinning] = useState(false);
+	const { member, setManitto } = useCurrentMember();
+	const { members } = useMemberStore();
 	const [didLaunch, setDidLaunch] = useState(false);
 	const [result, setResult] = useState(0);
 	const reelRef = useRef<HTMLDivElement>(null);
 	const { toast } = useToast();
-
-	const tripleSymbols = [...SYMBOLS, ...SYMBOLS, ...SYMBOLS, ...SYMBOLS];
+	const memberNames = members.map(member => member.name);
+	const tripleSymbols = [...memberNames, ...memberNames, ...memberNames, ...memberNames];
+	const theDay = new Date('2024-12-25 0:0:0');
+	const [diff, setDiff] = useState<string>('');
+	useEffect(() => {
+		const interval = setInterval(() => {
+			setDiff(formatDistanceToNow(theDay, { addSuffix: true, locale: ko }));
+		}, 1000);
+		return () => clearInterval(interval);
+	}, []);
 
 	// 랜덤으로 정한 결과를 받는 함수
 	const spin = async () => {
@@ -27,29 +42,32 @@ const SlotMachine = ({ members: SYMBOLS, manitto }: SlotMachineProps) => {
 		}
 		setIsSpinning(true);
 		// 랜덤 슬롯 실행
-		const { error, manitto } = await launchMachine(localStorage.getItem('uid')!);
-		if (error) toast({ title: 'ERROR', description: (error as Error).message });
-		const newResult = tripleSymbols.findLastIndex(x => x === manitto);
-		setResult(newResult);
+		const { error, manitto } = await launchMachine(member!.id);
+		if (manitto && manitto.id && manitto.name) {
+			setManitto(manitto.id);
+			if (error) toast({ title: 'ERROR', description: (error as Error).message });
+			const newResult = tripleSymbols.findLastIndex(x => x === manitto.name);
+			setResult(newResult);
 
-		if (reelRef.current) {
-			reelRef.current.style.transition = 'none';
-			reelRef.current.style.transform = 'translateY(0)';
-			//@ts-no-check
-			reelRef.current.offsetHeight;
+			if (reelRef.current) {
+				reelRef.current.style.transition = 'none';
+				reelRef.current.style.transform = 'translateY(0)';
+				//@ts-no-check
+				reelRef.current.offsetHeight;
 
-			reelRef.current.style.transition = `transform ${SPIN_DURATION}ms cubic-bezier(.12,1.15,.94,.9)`;
-			const finalPosition = SYMBOLS.length * SYMBOL_HEIGHT + newResult * SYMBOL_HEIGHT;
-			reelRef.current.style.transform = `translateY(-${finalPosition}px)`;
+				reelRef.current.style.transition = `transform ${SPIN_DURATION}ms cubic-bezier(.12,1.15,.94,.9)`;
+				const finalPosition = memberNames.length * SYMBOL_HEIGHT + newResult * SYMBOL_HEIGHT;
+				reelRef.current.style.transform = `translateY(-${finalPosition}px)`;
 
-			setTimeout(() => {
-				if (reelRef.current) {
-					setIsSpinning(false);
-					setDidLaunch(true);
-					reelRef.current.style.transition = 'none';
-					reelRef.current.style.transform = `translateY(-${newResult * SYMBOL_HEIGHT}px)`;
-				}
-			}, SPIN_DURATION);
+				setTimeout(() => {
+					if (reelRef.current) {
+						setIsSpinning(false);
+						setDidLaunch(true);
+						reelRef.current.style.transition = 'none';
+						reelRef.current.style.transform = `translateY(-${newResult * SYMBOL_HEIGHT}px)`;
+					}
+				}, SPIN_DURATION);
+			}
 		}
 	};
 
@@ -75,7 +93,7 @@ const SlotMachine = ({ members: SYMBOLS, manitto }: SlotMachineProps) => {
 				</div>
 
 				<div className="relative h-full">
-					{!manitto && !didLaunch && (
+					{!didLaunch && !member?.manittoId && (
 						<div className="fixed -translate-x-1/2 -translate-y-1/2 left-3/4 top-1/3 -z-10 cursor-pointer">
 							<div
 								className={cn(
@@ -117,14 +135,16 @@ const SlotMachine = ({ members: SYMBOLS, manitto }: SlotMachineProps) => {
 									'h-20 flex items-center justify-center text-4xl text-amber-600 font-black bg-gradient-to-br from-zinc-300 to-zinc-400'
 								}
 							>
-								{manitto}
+								{members.find(x => x.id === member?.manittoId)?.name}
 							</div>
 						)}
 					</div>
 				</div>
 			</div>
-			{manitto ? (
-				<div>이미 참여하셨어요</div>
+			{member?.manittoId ? (
+				<div>
+					참여 완료! 미션을 시작하세요! 미션은 <span className="text-rose-600">{diff}</span>에 종료됩니다!{' '}
+				</div>
 			) : (
 				!didLaunch &&
 				!isSpinning && (

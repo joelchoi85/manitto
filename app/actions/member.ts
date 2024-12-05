@@ -1,30 +1,30 @@
 'use server';
 import bcrypt from 'bcrypt';
-import { Member } from '../page';
+// import { Member } from '../page';
 import prisma from '@/lib/client/prisma';
 
-export async function addMember(member: Member) {
-	try {
-		const upsertedMember = await prisma.member.upsert({
-			create: {
-				name: member.name,
-			},
-			update: {
-				name: member.name,
-			},
-			where: {
-				name: member.name,
-			},
-		});
-		return { member: upsertedMember };
-	} catch (error) {
-		if (error instanceof Error) return { error: error.toString() };
-		else
-			return {
-				error: '알 수 없는 오류',
-			};
-	}
-}
+// export async function addMember(member: Member) {
+// 	try {
+// 		const upsertedMember = await prisma.member.upsert({
+// 			create: {
+// 				name: member.name,
+// 			},
+// 			update: {
+// 				name: member.name,
+// 			},
+// 			where: {
+// 				name: member.name,
+// 			},
+// 		});
+// 		return { member: upsertedMember };
+// 	} catch (error) {
+// 		if (error instanceof Error) return { error: error.toString() };
+// 		else
+// 			return {
+// 				error: '알 수 없는 오류',
+// 			};
+// 	}
+// }
 
 export async function findMemberByName(name: string) {
 	try {
@@ -36,9 +36,16 @@ export async function findMemberByName(name: string) {
 				name: true,
 				id: true,
 				password: true,
+				manittoId: true,
 			},
 		});
-		if (member) return { id: member.id, name: member.name, isFirst: !member.password || member.password.length === 0 };
+		if (member)
+			return {
+				id: member.id,
+				name: member.name,
+				manittoId: member.manittoId,
+				isFirst: !member.password || member.password.length === 0,
+			};
 		return;
 	} catch (error) {
 		console.log(error);
@@ -70,10 +77,10 @@ export async function changePassword(id: string, password: string) {
 	}
 }
 
-export async function confirmMember(name: string, password: string) {
+export async function confirmMember(id: string, password: string) {
 	try {
 		const member = await prisma.member.findUnique({
-			where: { name },
+			where: { id },
 			select: {
 				id: true,
 				password: true,
@@ -96,6 +103,16 @@ export async function getAllMemberNames() {
 	try {
 		const members = await prisma.member.findMany({ select: { name: true } });
 		return { members: members.map(member => member.name) };
+	} catch (error) {
+		console.log(error);
+		return { members: [] };
+	}
+}
+
+export async function getAllMembers() {
+	try {
+		const members = await prisma.member.findMany({ select: { name: true, id: true, manittoId: true } });
+		return { members };
 	} catch (error) {
 		console.log(error);
 		return { members: [] };

@@ -9,25 +9,26 @@ import { useActionState, useState } from 'react';
 import { changePassword, confirmMember, findMemberByName } from './actions/member';
 import { AddMember } from '@/schemas';
 import { useRouter } from 'next/navigation';
-// import { useFormState, useFormStatus } from 'react-dom';
+import useCurrentMember from '@/hooks/use-current-member';
 
 export interface Member {
+	id: string;
 	name: string;
-	manitto?: Member;
-	password?: string;
+	manittoId?: string | null;
 }
 export default function Home() {
 	const initialState: Member = {
+		id: '',
 		name: '',
-		password: undefined,
-		manitto: undefined,
+		manittoId: undefined,
 	};
 	const { toast } = useToast();
 	const router = useRouter();
-	const [member, setMember] = useState<Member>(initialState);
+	const { member, login } = useCurrentMember();
+	// const [member, setMember] = useState<Member>(initialState);
 	const [isFirst, setIsFirst] = useState<boolean>(false);
 	const [isSetName, setIsSetName] = useState<boolean>(false);
-	const onSubmit = async (currentState: Member, formData: FormData) => {
+	const onSubmit = async (currentState: Member | null, formData: FormData) => {
 		const testData = {
 			name: formData.get('name'),
 			password: formData.get('password'),
@@ -35,28 +36,31 @@ export default function Home() {
 		const { success, data, error } = AddMember.safeParse(testData);
 		// 입력파싱
 		if (success) {
-			// 비밀번호입력인가
+			// 비밀번호입력
 			if (data.password) {
-				if (isFirst) {
-					const user = await changePassword(localStorage.getItem('uid')!, data.password);
+				// 처음 사용자
+				if (isFirst && member) {
+					const user = await changePassword(member.id, data.password);
 					if (user && user.id) {
-						toast({ title: '성공적으로 추가되었습니다!', description: '마니또에 참여하셨습니다.' });
+						toast({ title: '첫 로그인 성공!', description: '마니또에 참여하셨습니다.' });
 						router.push('/manitto');
 					}
 				} else {
-					const { success } = await confirmMember(member.name, data.password);
-					if (success) router.push('/manitto');
-					else {
-						toast({ title: '로그인 오류', description: '비밀번호를 올바르게 입력해주세요' });
+					if (member && member.name) {
+						const { success } = await confirmMember(member.id, data.password);
+						toast({ title: '로그인 성공!', description: '마니또에 참여하셨습니다.' });
+						if (success) router.push('/manitto');
+						else {
+							toast({ title: '로그인 오류', description: '비밀번호를 올바르게 입력해주세요' });
+						}
 					}
 				}
-				// 이름 입력인가
+				// 이름 입력
 			} else {
 				const user = await findMemberByName(data.name!);
 				if (user) {
-					localStorage.setItem('uid', user.id);
-					localStorage.setItem('uname', user.name);
-					setMember(prev => ({ ...prev, name: user.name }));
+					login({ id: user.id, name: user.name, manittoId: user.manittoId });
+					// setMember(prev => ({ ...prev, name: user.name }));
 					setIsSetName(true);
 					setIsFirst(user.isFirst);
 				}
@@ -94,9 +98,9 @@ export default function Home() {
 					<CardDescription>{'참여하시는 분의 이름을 입력하세요'}</CardDescription>
 				</CardHeader>
 				<CardContent className="space-y-4">
-					{isSetName && member.name && (
+					{isSetName && member && member.name && (
 						<div className="text-zinc-500 font-semibold" onClick={() => setIsSetName(false)}>
-							이름 : {state.name || member.name}
+							이름 : {state?.name || member.name}
 						</div>
 					)}
 

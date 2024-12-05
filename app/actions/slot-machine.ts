@@ -51,7 +51,7 @@ export async function launchMachine(id: string) {
 			},
 		});
 
-		return { manitto: determinedManittoMember.manitto?.name };
+		return { manitto: { id: determinedManittoMember.manitto?.id, name: determinedManittoMember.manitto?.name } };
 	} catch (error) {
 		console.log(error);
 		return { error };
