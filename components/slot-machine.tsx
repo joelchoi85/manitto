@@ -52,7 +52,7 @@ export default function SlotMachine({ members: SYMBOLS }: SlotMachineProps) {
 		if (reelRef.current) {
 			reelRef.current.style.transform = `translateY(-${result * SYMBOL_HEIGHT}px)`;
 		}
-	}, []);
+	}, [result]);
 
 	return (
 		<div className="flex flex-col items-center gap-4">

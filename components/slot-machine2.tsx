@@ -57,7 +57,7 @@ const SlotMachine = ({ members: SYMBOLS, manitto }: SlotMachineProps) => {
 		if (reelRef.current) {
 			reelRef.current.style.transform = `translateY(-${result * SYMBOL_HEIGHT}px)`;
 		}
-	}, []);
+	}, [result]);
 
 	return (
 		<div
