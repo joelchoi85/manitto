@@ -27,7 +27,7 @@ export default function SlotMachine({ members: SYMBOLS }: SlotMachineProps) {
 			reelRef.current.style.transform = 'translateY(0)';
 
 			// 리플로우를 강제로 발생시켜 위치 재설정이 적용되게 합니다
-			//@ts-expect-error
+			//@ts-nocheck
 			reelRef.current.offsetHeight;
 
 			// 회전 애니메이션 시작
