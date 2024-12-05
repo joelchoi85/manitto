@@ -35,7 +35,7 @@ const SlotMachine = ({ members: SYMBOLS, manitto }: SlotMachineProps) => {
 		if (reelRef.current) {
 			reelRef.current.style.transition = 'none';
 			reelRef.current.style.transform = 'translateY(0)';
-			//@ts-ignore
+			//@ts-expect-error
 			reelRef.current.offsetHeight;
 
 			reelRef.current.style.transition = `transform ${SPIN_DURATION}ms cubic-bezier(.12,1.15,.94,.9)`;

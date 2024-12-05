@@ -20,7 +20,8 @@ export default function MyManitto({ id }: { id?: string }) {
 	// const [manitto, setManitto] = useState<string>();
 	const [data, formAction /* isPending */] = useActionState(onSubmit, undefined);
 	const [members, setMembers] = useState<string[]>([]);
-	async function onSubmit(prevState: any, formData: FormData) {
+
+	async function onSubmit(prevState: unknown, formData: FormData) {
 		const { success, member } = await confirmMember(localStorage.getItem('uname')!, formData.get('password') as string);
 		setIsConfirmed(success);
 
