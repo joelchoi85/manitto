@@ -17,7 +17,7 @@ import SlotMachine from './slot-machine2';
 
 export default function MyManitto({ id }: { id?: string }) {
 	const [isConfirmed, setIsConfirmed] = useState(false);
-	// const [manitto, setManitto] = useState<string>();
+	const [manitto, setManitto] = useState<string>();
 	const [data, formAction /* isPending */] = useActionState(onSubmit, undefined);
 	const [members, setMembers] = useState<string[]>([]);
 
@@ -27,7 +27,7 @@ export default function MyManitto({ id }: { id?: string }) {
 
 		if (member) {
 			if (member.manitto) {
-				// setManitto(member.manitto.name);
+				setManitto(member.manitto.name);
 			} else {
 				const { members: _members } = await getAllMemberNames();
 				setMembers(_members);
@@ -53,7 +53,7 @@ export default function MyManitto({ id }: { id?: string }) {
 				)}
 				{isConfirmed && (
 					<div>
-						<SlotMachine members={members} manitto={data?.manitto} />
+						<SlotMachine members={members} manitto={data?.manitto || manitto} />
 					</div>
 				)}
 				<DialogFooter></DialogFooter>
