@@ -30,6 +30,11 @@
 		"zod": "^3.23.8",
 		"zustand": "^5.0.2"
 	},
+	"overrides": {
+		"zustand": {
+			"react": "^19.0.0-rc-66855b96-20241106"
+		}
+	},
 	"devDependencies": {
 		"@paralleldrive/cuid2": "^2.2.2",
 		"@types/node": "^20",
