@@ -1,4 +1,4 @@
-import { Member, Message } from '@prisma/client';
+import { Message } from '@prisma/client';
 import { Badge } from './ui/badge';
 import { cn } from '@/lib/utils';
 interface MessageBoxProps {

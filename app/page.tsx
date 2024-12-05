@@ -96,7 +96,7 @@ export default function Home() {
 				<CardContent className="space-y-4">
 					{isSetName && member.name && (
 						<div className="text-zinc-500 font-semibold" onClick={() => setIsSetName(false)}>
-							이름 : {member.name}
+							이름 : {state.name || member.name}
 						</div>
 					)}
 

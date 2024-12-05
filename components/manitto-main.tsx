@@ -14,9 +14,9 @@ import MyManitto from './my-manitto';
 interface ManittoMainProps {
 	members: Member[];
 }
-type MemberType = Member & {
-	manitto?: Member;
-};
+// type MemberType = Member & {
+// 	manitto?: Member;
+// };
 type MessageType = Message & { Member: { name: string } };
 export default function ManittoMain({ members }: ManittoMainProps) {
 	const [viewportHeight, setViewportHeight] = useState(window.innerHeight);
