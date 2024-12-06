@@ -13,6 +13,7 @@ import MyManitto from './my-manitto';
 import useMemberStore from '@/hooks/use-members';
 import useCurrentMember from '@/hooks/use-current-member';
 import Logout from './logout';
+import Image from 'next/image';
 
 type MessageType = Message & { Member: { name: string } };
 export default function ManittoMain() {
@@ -123,16 +124,16 @@ export default function ManittoMain() {
 	};
 
 	return (
-		<div className="font-pretendard relative bg-sky-600 h-screen w-screen overflow-hidden flex flex-col gap-4">
-			{/* <div className="absolute w-full h-full -z-10">
+		<div className="font-pretendard relative h-screen w-screen overflow-hidden flex flex-col gap-4">
+			<div className="absolute w-full h-full -z-10">
 				<Image
 					alt="background"
-					src="https://images.unsplash.com/photo-1563714193017-5a5fb60bc02b?q=80&w=1287&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+					src="https://images.unsplash.com/photo-1511772037890-94e405ddcc0d?q=80&w=1288&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
 					objectFit={'cover'}
 					fill
-					className="opacity-70"
+					className="opacity-90"
 				/>
-			</div> */}
+			</div>
 			<Card className="absolute">
 				<CardHeader className={cn(collapse && 'hidden')}>
 					<CardTitle>마니또 참여자</CardTitle>
