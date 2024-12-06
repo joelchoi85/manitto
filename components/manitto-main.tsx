@@ -17,7 +17,7 @@ import Image from 'next/image';
 
 type MessageType = Message & { Member: { name: string } };
 export default function ManittoMain() {
-	const { initMembers, members, modifyMember } = useMemberStore();
+	const { initMembers, members } = useMemberStore();
 	const { member } = useCurrentMember();
 	const [viewportHeight, setViewportHeight] = useState(600);
 	const messageEndRef = useRef<HTMLDivElement | null>(null); // 스크롤 내릴 참조
@@ -160,7 +160,10 @@ export default function ManittoMain() {
 			</Card>
 			{member && (
 				<>
-					<div className="pt-16 px-4 overflow-y-scroll" style={{ minHeight: `${viewportHeight}px` }}>
+					<div
+						className={cn(collapse ? 'pt-16' : ' pt-56 overflow-y-scroll')}
+						style={{ minHeight: `${viewportHeight}px` }}
+					>
 						{messages.map(msg => (
 							<div key={msg.id} className="my-2">
 								{member?.id !== msg.memberId ? (
