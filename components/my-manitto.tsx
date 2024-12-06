@@ -1,4 +1,3 @@
-'use client';
 import {
 	Dialog,
 	DialogContent,
@@ -9,15 +8,10 @@ import {
 	DialogTrigger,
 } from './ui/dialog';
 import SlotMachine from './slot-machine2';
-import useMemberStore from '@/hooks/use-members';
-import useCurrentMember from '@/hooks/use-current-member';
-import { redirect } from 'next/navigation';
 import { Button } from './ui/button';
 import { EggFriedIcon } from 'lucide-react';
 
 export default function MyManitto() {
-	const { member } = useCurrentMember();
-	if (!member || !member.id) redirect('/');
 	return (
 		<Dialog>
 			<DialogTrigger asChild>

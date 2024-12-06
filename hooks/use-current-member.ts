@@ -1,6 +1,8 @@
-'use client';
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
+import { StateCreator } from 'zustand';
+const isClient = typeof window !== 'undefined';
+
 interface Member {
 	id: string;
 	name: string;
@@ -12,8 +14,10 @@ interface MemberState {
 	logout: () => void;
 	setManitto: (id: string) => void;
 }
+
+type MemberStateCreator = StateCreator<MemberState, [], [['zustand/persist', unknown]], MemberState>;
 const useCurrentMember = create<MemberState>()(
-	persist(
+	(isClient ? persist : (f: MemberStateCreator) => f)(
 		(set, get) => ({
 			member: null,
 			login: (member: Member) => set({ member }),

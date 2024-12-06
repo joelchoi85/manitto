@@ -11,6 +11,7 @@ interface MemberListState {
 	initMembers: () => void;
 	addMember: (member: Member) => void;
 	removeMember: (id: string) => void;
+	modifyMember: (member: Member) => void;
 }
 const useMemberStore = create<MemberListState>(set => ({
 	members: [],
@@ -20,6 +21,14 @@ const useMemberStore = create<MemberListState>(set => ({
 	},
 	addMember: member => set(state => ({ members: [...state.members, member] })),
 	removeMember: id => set(state => ({ members: state.members.filter(member => member.id !== id) })),
+	modifyMember: member =>
+		set(state => ({
+			members: state.members.splice(
+				state.members.findIndex(x => x.id === member.id),
+				1,
+				member,
+			),
+		})),
 }));
 
 export default useMemberStore;

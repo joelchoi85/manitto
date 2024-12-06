@@ -1,6 +1,6 @@
 'use client';
 import { supadb } from '@/lib/client/supabase';
-import { Member, Message } from '@prisma/client';
+import { Message } from '@prisma/client';
 import { useEffect, useRef, useState } from 'react';
 import { createId } from '@paralleldrive/cuid2';
 import { Badge } from './ui/badge';
@@ -17,12 +17,11 @@ import Image from 'next/image';
 
 type MessageType = Message & { Member: { name: string } };
 export default function ManittoMain() {
-	const { initMembers, members } = useMemberStore();
+	const { initMembers, members, modifyMember } = useMemberStore();
 	const { member } = useCurrentMember();
 	const [viewportHeight, setViewportHeight] = useState(600);
 	const messageEndRef = useRef<HTMLDivElement | null>(null); // 스크롤 내릴 참조
 	const [collapse, setCollapse] = useState<boolean>(false);
-
 	const buttonRef = useRef<HTMLButtonElement>(null);
 	const [messages, setMessages] = useState<MessageType[]>([]);
 	const [input, setInput] = useState('');
@@ -56,50 +55,49 @@ export default function ManittoMain() {
 			.on(
 				'postgres_changes',
 				{
-					event: '*', // INSERT, UPDATE, DELETE, *
+					event: 'INSERT', // INSERT, UPDATE, DELETE, *
 					schema: 'public',
 					table: 'Message',
 				},
 				payload => {
 					if (payload.new) {
 						const object = payload.new as MessageType;
+						console.log(object);
 						const newMessage: MessageType = {
 							message: object.message,
 							id: object.id,
 							memberId: object.memberId,
 							createdAt: new Date(object.createdAt),
-							Member: object.Member,
+							Member: { name: members.find(x => x.id === object.memberId)?.name || '' },
 						};
 						setMessages(prev => (Array.isArray(prev) ? [...prev, newMessage] : [newMessage]));
 					}
 				},
 			)
 			.subscribe();
-		// 새 멤버 추가 사용해제
-		// const membersChannel = supadb
-		// 	.channel('member-channel')
-		// 	.on(
-		// 		'postgres_changes',
-		// 		{
-		// 			event: '*', // INSERT, UPDATE, DELETE, *
-		// 			schema: 'public',
-		// 			table: 'Member',
-		// 		},
-		// 		payload => {
-		// 			if (payload.new) {
-		// 				const object = payload.new as MemberType;
-		// 				const newMember: MemberType = {
-		// 					id: object.id,
-		// 					name: object.name,
-		// 					wanted: object.wanted,
-		// 					manittoId: object.manittoId,
-		// 					manitto: object.manitto,
-		// 				};
-		// 				setMembers(prev => (Array.isArray(prev) ? [...prev, newMember] : [newMember]));
-		// 			}
-		// 		},
-		// 	)
-		// 	.subscribe();
+
+		const membersChannel = supadb
+			.channel('member-channel')
+			.on(
+				'postgres_changes',
+				{
+					event: 'UPDATE', // INSERT, UPDATE, DELETE, *
+					schema: 'public',
+					table: 'Member',
+				},
+				payload => {
+					if (payload.new) {
+						const object = payload.new;
+						const newMember = {
+							id: object.id,
+							name: object.name,
+							manittoId: object.manittoId,
+						};
+						modifyMember(newMember);
+					}
+				},
+			)
+			.subscribe();
 		return () => {
 			channel.unsubscribe();
 			// membersChannel.unsubscribe();
@@ -129,9 +127,8 @@ export default function ManittoMain() {
 				<Image
 					alt="background"
 					src="https://images.unsplash.com/photo-1511772037890-94e405ddcc0d?q=80&w=1288&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-					objectFit={'cover'}
 					fill
-					className="opacity-90"
+					className="opacity-90 object-cover"
 				/>
 			</div>
 			<Card className="absolute">
@@ -141,11 +138,12 @@ export default function ManittoMain() {
 				</CardHeader>
 				<CardContent className={cn(collapse && 'hidden')}>
 					<div className="flex flex-wrap gap-2">
-						{members.map(member => (
-							<Badge key={member.id} variant={!!member.manittoId ? 'default' : 'secondary'}>
-								{member.name}
-							</Badge>
-						))}
+						{member &&
+							members.map(member => (
+								<Badge key={member.id} variant={!!member.manittoId ? 'default' : 'secondary'}>
+									{member.name}
+								</Badge>
+							))}
 					</div>
 				</CardContent>
 				<CardFooter className="flex justify-between">
@@ -155,35 +153,39 @@ export default function ManittoMain() {
 						</Badge>
 					</div>
 					<div>
-						<MyManitto />
+						{member && <MyManitto />}
 						<Logout />
 					</div>
 				</CardFooter>
 			</Card>
-			<div className="pt-16 px-4 overflow-y-scroll" style={{ minHeight: `${viewportHeight}px` }}>
-				{messages.map(msg => (
-					<div key={msg.id} className="my-2">
-						{member?.id !== msg.memberId ? (
-							<MessageBox name={msg.Member?.name || ''} msg={msg} itsMe={false} />
-						) : (
-							<MessageBox name={msg.Member?.name || ''} msg={msg} itsMe={true} />
-						)}
+			{member && (
+				<>
+					<div className="pt-16 px-4 overflow-y-scroll" style={{ minHeight: `${viewportHeight}px` }}>
+						{messages.map(msg => (
+							<div key={msg.id} className="my-2">
+								{member?.id !== msg.memberId ? (
+									<MessageBox name={msg.Member?.name || ''} msg={msg} itsMe={false} />
+								) : (
+									<MessageBox name={msg.Member?.name || ''} msg={msg} itsMe={true} />
+								)}
+							</div>
+						))}
+						<div ref={messageEndRef} className="pb-12"></div>
 					</div>
-				))}
-				<div ref={messageEndRef} className="pb-12"></div>
-			</div>
-			<div className="fixed w-full bottom-0 flex gap-0.5">
-				<input
-					className="flex-1 rounded-lg px-2 py-0.5"
-					value={input}
-					onKeyDown={e => e.key === 'Enter' && buttonRef.current?.click()}
-					onChange={e => setInput(e.target.value)}
-					placeholder="메시지를 입력하세요"
-				/>
-				<Button ref={buttonRef} type="submit" className="w-32" onClick={sendMessage}>
-					전송
-				</Button>
-			</div>
+					<div className="fixed w-full bottom-0 flex gap-0.5">
+						<input
+							className="flex-1 rounded-lg px-2 py-0.5"
+							value={input}
+							onKeyDown={e => e.key === 'Enter' && buttonRef.current?.click()}
+							onChange={e => setInput(e.target.value)}
+							placeholder="메시지를 입력하세요"
+						/>
+						<Button ref={buttonRef} type="submit" className="w-32" onClick={sendMessage}>
+							전송
+						</Button>
+					</div>
+				</>
+			)}
 		</div>
 	);
 }

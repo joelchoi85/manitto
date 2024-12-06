@@ -76,7 +76,8 @@ export default function Home() {
 			// 	toast({ title: '입력 오류', description: JSON.stringify(addError) });
 			// }
 		} else {
-			toast({ title: '입력 오류', description: error.message });
+			const err = error.flatten();
+			toast({ title: '입력 오류', description: JSON.stringify(err.fieldErrors) });
 		}
 		return member;
 	};
@@ -109,7 +110,7 @@ export default function Home() {
 							<Label htmlFor="name" className="space-y-2">
 								<div>이름</div>
 								<div className="flex gap-2 justify-normal lg:justify-center">
-									<Input type="text" name="name" id="name" className="max-w-72 text-2xl" />
+									<Input type="text" name="name" id="name" autoFocus className="max-w-72 text-2xl" />
 									<Button disabled={isPending} type="submit">
 										입장하기
 									</Button>
@@ -122,7 +123,7 @@ export default function Home() {
 							<Label htmlFor="password" className="space-y-2">
 								<div>비밀번호</div>
 								<div className="flex gap-2 justify-normal lg:justify-center">
-									<Input type="password" name="password" id="password" className="max-w-72 text-2xl" />
+									<Input type="password" name="password" id="password" autoFocus className="max-w-72 text-2xl" />
 									<Button disabled={isPending} type="submit">
 										입장하기
 									</Button>
