@@ -17,7 +17,7 @@ type MessageType = Message & { Member: { name: string } };
 export default function ManittoMain() {
 	const { initMembers, members } = useMemberStore();
 	const { member } = useCurrentMember();
-	const [viewportHeight, setViewportHeight] = useState(window.innerHeight);
+	const [viewportHeight, setViewportHeight] = useState(600);
 	const messageEndRef = useRef<HTMLDivElement | null>(null); // 스크롤 내릴 참조
 	const [collapse, setCollapse] = useState<boolean>(false);
 
