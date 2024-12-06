@@ -161,7 +161,7 @@ export default function ManittoMain() {
 			{member && (
 				<>
 					<div
-						className={cn(collapse ? 'pt-16' : ' pt-56 overflow-y-scroll')}
+						className={cn(collapse ? 'pt-16' : ' pt-56', 'px-2.5 overflow-y-scroll')}
 						style={{ minHeight: `${viewportHeight}px` }}
 					>
 						{messages.map(msg => (
