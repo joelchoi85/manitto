@@ -27,7 +27,7 @@ const SlotMachine = () => {
 	const memberNames = members.map(member => member.name);
 	const tripleSymbols = [
 		member?.manittoId ? (
-			members.find(x => x.id === member.manittoId)!.name
+			members.find(x => x.id === member.manittoId)?.name
 		) : (
 			<ArrowBigRightDash className="animate-bounce" size={40} />
 		),
@@ -81,7 +81,9 @@ const SlotMachine = () => {
 				}
 				if (manitto && manitto.id && manitto.name) {
 					const newResult = tripleSymbols.findLastIndex(x => x === manitto.name);
+					console.log('before setResult');
 					setResult(newResult);
+					console.log('setResult');
 					if (reelRef.current) {
 						reelRef.current.style.transition = 'transform 500ms cubic-bezier(0.45, 0.05, 0.55, 0.95)';
 						const finalPosition = 1 + memberNames.length * SYMBOL_HEIGHT + (1 + newResult) * SYMBOL_HEIGHT;
@@ -91,7 +93,6 @@ const SlotMachine = () => {
 							setIsSpinning(false);
 							setDidLaunch(true);
 							manitto.id && setManitto(manitto.id);
-							console.log(manitto.name);
 							if (reelRef.current) {
 								reelRef.current.style.transition = 'none';
 								// reelRef.current.style.transform = `none`;

@@ -76,28 +76,28 @@ export default function ManittoMain() {
 			)
 			.subscribe();
 
-		const membersChannel = supadb
-			.channel('member-channel')
-			.on(
-				'postgres_changes',
-				{
-					event: 'UPDATE', // INSERT, UPDATE, DELETE, *
-					schema: 'public',
-					table: 'Member',
-				},
-				payload => {
-					if (payload.new) {
-						const object = payload.new;
-						const newMember = {
-							id: object.id,
-							name: object.name,
-							manittoId: object.manittoId,
-						};
-						modifyMember(newMember);
-					}
-				},
-			)
-			.subscribe();
+		// const membersChannel = supadb
+		// 	.channel('member-channel')
+		// 	.on(
+		// 		'postgres_changes',
+		// 		{
+		// 			event: 'UPDATE', // INSERT, UPDATE, DELETE, *
+		// 			schema: 'public',
+		// 			table: 'Member',
+		// 		},
+		// 		payload => {
+		// 			if (payload.new) {
+		// 				const object = payload.new;
+		// 				const newMember = {
+		// 					id: object.id,
+		// 					name: object.name,
+		// 					manittoId: object.manittoId,
+		// 				};
+		// 				modifyMember(newMember);
+		// 			}
+		// 		},
+		// 	)
+		// 	.subscribe();
 		return () => {
 			channel.unsubscribe();
 			// membersChannel.unsubscribe();
