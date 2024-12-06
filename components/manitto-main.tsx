@@ -10,14 +10,15 @@ import MessageBox from './message-box';
 import { cn } from '@/lib/utils';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import MyManitto from './my-manitto';
-import useMemberStore from '@/hooks/use-members';
+
 import useCurrentMember from '@/hooks/use-current-member';
 import Logout from './logout';
 import Image from 'next/image';
+import { useMembersHook } from '@/hooks/use-members';
 
 type MessageType = Message & { Member: { name: string } };
 export default function ManittoMain() {
-	const { initMembers, members } = useMemberStore();
+	const { members } = useMembersHook();
 	const { member } = useCurrentMember();
 	const [viewportHeight, setViewportHeight] = useState(600);
 	const messageEndRef = useRef<HTMLDivElement | null>(null); // 스크롤 내릴 참조
@@ -27,7 +28,6 @@ export default function ManittoMain() {
 	const [input, setInput] = useState('');
 
 	useEffect(() => {
-		initMembers();
 		const handleResize = () => {
 			setViewportHeight(window.innerHeight);
 		};
@@ -62,7 +62,6 @@ export default function ManittoMain() {
 				payload => {
 					if (payload.new) {
 						const object = payload.new as MessageType;
-						console.log(object);
 						const newMessage: MessageType = {
 							message: object.message,
 							id: object.id,

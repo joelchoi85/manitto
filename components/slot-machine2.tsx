@@ -1,13 +1,13 @@
 'use client';
 import { launchMachine } from '@/app/actions/slot-machine';
 import useCurrentMember from '@/hooks/use-current-member';
-import useMemberStore from '@/hooks/use-members';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { formatDistanceToNow } from 'date-fns';
 import { ArrowBigRightDash } from 'lucide-react';
 import React, { useState, useEffect, useRef } from 'react';
 import { ko } from 'date-fns/locale';
+import { useMembersHook } from '@/hooks/use-members';
 
 const SYMBOL_HEIGHT = 60;
 const MIN_SPIN_DURATION = 6000;
@@ -18,7 +18,7 @@ const MIN_SPIN_DURATION = 6000;
 const SlotMachine = () => {
 	const [isSpinning, setIsSpinning] = useState(false);
 	const { member, setManitto } = useCurrentMember();
-	const { members } = useMemberStore();
+	const { members } = useMembersHook();
 	const [didLaunch, setDidLaunch] = useState(false);
 	const [result, setResult] = useState(0);
 	const reelRef = useRef<HTMLDivElement>(null);
@@ -81,9 +81,7 @@ const SlotMachine = () => {
 				}
 				if (manitto && manitto.id && manitto.name) {
 					const newResult = tripleSymbols.findLastIndex(x => x === manitto.name);
-					console.log('before setResult');
 					setResult(newResult);
-					console.log('setResult');
 					if (reelRef.current) {
 						reelRef.current.style.transition = 'transform 500ms cubic-bezier(0.45, 0.05, 0.55, 0.95)';
 						const finalPosition = 1 + memberNames.length * SYMBOL_HEIGHT + (1 + newResult) * SYMBOL_HEIGHT;
