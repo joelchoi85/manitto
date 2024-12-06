@@ -12,6 +12,7 @@ import { ChevronDown, ChevronUp } from 'lucide-react';
 import MyManitto from './my-manitto';
 import useMemberStore from '@/hooks/use-members';
 import useCurrentMember from '@/hooks/use-current-member';
+import Logout from './logout';
 
 type MessageType = Message & { Member: { name: string } };
 export default function ManittoMain() {
@@ -24,6 +25,7 @@ export default function ManittoMain() {
 	const buttonRef = useRef<HTMLButtonElement>(null);
 	const [messages, setMessages] = useState<MessageType[]>([]);
 	const [input, setInput] = useState('');
+
 	useEffect(() => {
 		initMembers();
 		const handleResize = () => {
@@ -108,6 +110,7 @@ export default function ManittoMain() {
 			messageEndRef.current.scrollIntoView({ behavior: 'smooth' });
 		}
 	}, [messages]);
+
 	const sendMessage = async () => {
 		if (input && member && member.id.length > 0) {
 			try {
@@ -144,11 +147,16 @@ export default function ManittoMain() {
 						))}
 					</div>
 				</CardContent>
-				<CardFooter>
-					<Badge variant={'outline'} onClick={() => setCollapse(prev => !prev)}>
-						{collapse ? <ChevronDown /> : <ChevronUp />}
-					</Badge>
-					<MyManitto />
+				<CardFooter className="flex justify-between">
+					<div>
+						<Badge variant={'outline'} onClick={() => setCollapse(prev => !prev)}>
+							{collapse ? <ChevronDown /> : <ChevronUp />}
+						</Badge>
+					</div>
+					<div>
+						<MyManitto />
+						<Logout />
+					</div>
 				</CardFooter>
 			</Card>
 			<div className="pt-16 px-4 overflow-y-scroll" style={{ minHeight: `${viewportHeight}px` }}>

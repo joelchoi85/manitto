@@ -12,13 +12,19 @@ import SlotMachine from './slot-machine2';
 import useMemberStore from '@/hooks/use-members';
 import useCurrentMember from '@/hooks/use-current-member';
 import { redirect } from 'next/navigation';
+import { Button } from './ui/button';
+import { EggFriedIcon } from 'lucide-react';
 
 export default function MyManitto() {
 	const { member } = useCurrentMember();
 	if (!member || !member.id) redirect('/');
 	return (
 		<Dialog>
-			<DialogTrigger className="text-sm px-4 py-1 rounded-lg bg-black text-white">내 마니또 보기</DialogTrigger>
+			<DialogTrigger asChild>
+				<Button>
+					<EggFriedIcon />내 마니또 보기
+				</Button>
+			</DialogTrigger>
 			<DialogContent>
 				<DialogHeader>
 					<DialogTitle>내 마니또</DialogTitle>

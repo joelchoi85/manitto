@@ -87,7 +87,7 @@ export default function Home() {
 			<div className="absolute flex justify-center items-center rounded-sm overflow-hidden bg-white w-full h-full aspect-auto">
 				<Image
 					alt="background"
-					src="https://images.unsplash.com/photo-1726616319695-5919d913818d?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+					src="https://images.unsplash.com/photo-1513321312075-f83271be3474?q=80&w=1334&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
 					fill={true}
 					style={{ objectFit: 'cover' }}
 				/>

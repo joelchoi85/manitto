@@ -5,12 +5,12 @@ import useMemberStore from '@/hooks/use-members';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { formatDistanceToNow } from 'date-fns';
-import { ArrowUpIcon } from 'lucide-react';
+import { ArrowBigRightDash } from 'lucide-react';
 import React, { useState, useEffect, useRef } from 'react';
 import { ko } from 'date-fns/locale';
 
 const SYMBOL_HEIGHT = 60;
-const SPIN_DURATION = 7000;
+const MIN_SPIN_DURATION = 6000;
 // interface SlotMachineProps {
 // 	manitto?: string;
 // 	memberNameList: string[];
@@ -22,9 +22,20 @@ const SlotMachine = () => {
 	const [didLaunch, setDidLaunch] = useState(false);
 	const [result, setResult] = useState(0);
 	const reelRef = useRef<HTMLDivElement>(null);
+	const spinStartTimeRef = useRef(0);
 	const { toast } = useToast();
 	const memberNames = members.map(member => member.name);
-	const tripleSymbols = [...memberNames, ...memberNames, ...memberNames, ...memberNames];
+	const tripleSymbols = [
+		member?.manittoId ? (
+			members.find(x => x.id === member.manittoId)!.name
+		) : (
+			<ArrowBigRightDash className="animate-bounce" size={40} />
+		),
+		...memberNames,
+		...memberNames,
+		...memberNames,
+		...memberNames,
+	];
 	const theDay = new Date('2024-12-25 0:0:0');
 	const [diff, setDiff] = useState<string>('');
 	useEffect(() => {
@@ -34,41 +45,76 @@ const SlotMachine = () => {
 		return () => clearInterval(interval);
 	}, []);
 
+	const fetchResult = async () => {
+		const { error, manitto } = await launchMachine(member!.id);
+		return { error, manitto };
+	};
 	// 랜덤으로 정한 결과를 받는 함수
 	const spin = async () => {
 		if (isSpinning) {
-			toast({ title: '이미 베팅하셨어요.', description: '베팅은 한 번 만 가능해요' });
+			toast({ title: '이미 뽑으셨어요.', description: '뽑기는 한 번 만 가능해요' });
 			return;
 		}
 		setIsSpinning(true);
+		spinStartTimeRef.current = Date.now();
 		// 랜덤 슬롯 실행
-		const { error, manitto } = await launchMachine(member!.id);
-		if (manitto && manitto.id && manitto.name) {
-			setManitto(manitto.id);
-			if (error) toast({ title: 'ERROR', description: (error as Error).message });
-			const newResult = tripleSymbols.findLastIndex(x => x === manitto.name);
-			setResult(newResult);
+		// const { error, manitto } = await launchMachine(member!.id);
+		// if (manitto && manitto.id && manitto.name) {
+		// setManitto(manitto.id);
+		// if (error) toast({ title: 'ERROR', description: (error as Error).message });
+		// const newResult = tripleSymbols.findLastIndex(x => x === manitto.name);
+		// setResult(newResult);
 
-			if (reelRef.current) {
-				reelRef.current.style.transition = 'none';
-				reelRef.current.style.transform = 'translateY(0)';
-				//@ts-no-check
-				reelRef.current.offsetHeight;
+		if (reelRef.current) {
+			reelRef.current.style.transition = 'none';
+			reelRef.current.style.transform = 'translateY(0)';
+			reelRef.current.offsetHeight;
+			reelRef.current.style.transition = `transform ${MIN_SPIN_DURATION}ms cubic-bezier(.12,1.15,.94,.9)`;
+			reelRef.current.style.transform = `translateY(-${memberNames.length * SYMBOL_HEIGHT * 3}px)`;
 
-				reelRef.current.style.transition = `transform ${SPIN_DURATION}ms cubic-bezier(.12,1.15,.94,.9)`;
-				const finalPosition = memberNames.length * SYMBOL_HEIGHT + newResult * SYMBOL_HEIGHT;
-				reelRef.current.style.transform = `translateY(-${finalPosition}px)`;
-
-				setTimeout(() => {
+			try {
+				const { error, manitto } = await fetchResult();
+				if (error) toast({ title: '문제가 생겼어요', description: (error as Error).message });
+				const elapsedTime = Date.now() - spinStartTimeRef.current;
+				if (elapsedTime < MIN_SPIN_DURATION) {
+					await new Promise(resolve => setTimeout(resolve, MIN_SPIN_DURATION - elapsedTime));
+				}
+				if (manitto && manitto.id && manitto.name) {
+					const newResult = tripleSymbols.findLastIndex(x => x === manitto.name);
+					setResult(newResult);
 					if (reelRef.current) {
-						setIsSpinning(false);
-						setDidLaunch(true);
-						reelRef.current.style.transition = 'none';
-						reelRef.current.style.transform = `translateY(-${newResult * SYMBOL_HEIGHT}px)`;
+						reelRef.current.style.transition = 'transform 500ms cubic-bezier(0.45, 0.05, 0.55, 0.95)';
+						const finalPosition = 1 + memberNames.length * SYMBOL_HEIGHT + (1 + newResult) * SYMBOL_HEIGHT;
+						reelRef.current.style.transform = `translateY(-${finalPosition}px)`;
+
+						setTimeout(() => {
+							setIsSpinning(false);
+							setDidLaunch(true);
+							manitto.id && setManitto(manitto.id);
+							console.log(manitto.name);
+							if (reelRef.current) {
+								reelRef.current.style.transition = 'none';
+								// reelRef.current.style.transform = `none`;
+								reelRef.current.style.transform = `translateY(-${newResult * SYMBOL_HEIGHT}px)`;
+							}
+						}, 500);
 					}
-				}, SPIN_DURATION);
+				}
+			} catch (error) {
+				console.error('패치 실패', error);
+				setIsSpinning(false);
 			}
+
+			// setTimeout(() => {
+			// 	if (reelRef.current) {
+			// 		setIsSpinning(false);
+			// 		setDidLaunch(true);
+			// 		reelRef.current.style.transition = 'none';
+			//    reelRef.current.style.transform = `translateY(-${newResult * SYMBOL_HEIGHT}px)`;
+			// 	}
+			// }, MIN_SPIN_DURATION);
 		}
+		// }
 	};
 
 	useEffect(() => {
@@ -121,9 +167,10 @@ const SlotMachine = () => {
 							tripleSymbols.map((symbol, index) => (
 								<div
 									key={index}
-									className={
-										'h-20 flex items-center justify-center text-4xl text-amber-600 font-black bg-gradient-to-br from-yellow-400 to-amber-400'
-									}
+									className={cn(
+										'select-none h-20 flex items-center justify-center text-4xl text-amber-600 font-black bg-gradient-to-br',
+										member?.manittoId ? 'from-emerald-300 to-fuchsia-400' : 'from-yellow-400 to-amber-400',
+									)}
 									style={{ height: `${SYMBOL_HEIGHT}px` }}
 								>
 									{symbol}
@@ -141,17 +188,10 @@ const SlotMachine = () => {
 					</div>
 				</div>
 			</div>
-			{member?.manittoId ? (
+			{member?.manittoId && !isSpinning && (
 				<div>
-					참여 완료! 미션을 시작하세요! 미션은 <span className="text-rose-600">{diff}</span>에 종료됩니다!{' '}
+					참여 완료! 미션을 시작하세요! 미션은 <span className="text-rose-600">{diff}</span>에 종료됩니다!
 				</div>
-			) : (
-				!didLaunch &&
-				!isSpinning && (
-					<div className="fixed right-4 bottom-0 flex justify-end">
-						<ArrowUpIcon className="text-rose-500 animate-bounce" size={60} />
-					</div>
-				)
 			)}
 
 			<div className="flex gap-2"></div>
